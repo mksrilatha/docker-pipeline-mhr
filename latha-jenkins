@@ -1,0 +1,38 @@
+pipeline{
+   agent any
+        tools{
+            maven 'maven 3.8.6'
+        }
+       stages{
+           stage('git checck out'){
+                 steps{
+                            git 'https://github.com/mksrilatha/docker-pipeline-mhr.git'
+            
+                }
+            }
+         stage('maven clean insatall'){
+            steps{
+                sh 'mvn clean install'
+            }
+         }
+          stage('docker build'){
+              steps{
+                  sh 'docker build -t mksri/septjavaimage:v4 .'
+              }
+          }
+          stage('docker login'){
+              steps{
+                withCredentials([string(credentialsId: 'dockersepbatch', variable: 'dockerpass')]) {
+                  sh 'docker login -u mksri -p ${dockerpass}'
+              }
+          } 
+        }
+          stage('push docker image to dockerhub'){
+              steps{
+                  sh ' docker push mksri/septjavaimage:v4 '
+              }
+          }
+           
+        }
+     }
+    
